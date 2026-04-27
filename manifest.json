@@ -1,0 +1,26 @@
+{
+  "name": "Drone Studio",
+  "short_name": "Drone Studio",
+  "description": "Violin drone music player — 14 scales, Art Deco zodiac wheel",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0906",
+  "theme_color": "#0a0906",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "entertainment"],
+  "screenshots": []
+}
