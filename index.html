@@ -369,8 +369,42 @@ function hitTest(ex,ey){const rect=document.getElementById('scene').getBoundingC
 const hlEl=document.getElementById('hl');
 hlEl.addEventListener('mousemove',e=>{const i=hitTest(e.clientX,e.clientY);hi=i;hlEl.style.cursor=i>=0?'pointer':'crosshair';document.getElementById('stlbl').textContent=i>=0?SCALES[i].label:'';});
 hlEl.addEventListener('mouseleave',()=>{hi=-1;document.getElementById('stlbl').textContent='';});
-hlEl.addEventListener('click',e=>{const i=hitTest(e.clientX,e.clientY);if(i<0){stopA();return;}const prev=ci;ci=i;if(i!==prev){upTop(i);stTim();}startStream(i);play(i);});
-hlEl.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];const i=hitTest(t.clientX,t.clientY);if(i<0){stopA();return;}ci=i;upTop(i);stTim();startStream(i);},{passive:false});
+async function handleStonePress(clientX, clientY) {
+  const i = hitTest(clientX, clientY);
+
+  if (i < 0) {
+    stopA();
+    return;
+  }
+
+  initA();
+
+  if (ac.state === 'suspended') {
+    await ac.resume();
+  }
+
+  await loadAll();
+
+  if (!bufs[i]) {
+    console.error('Audio did not load:', AUDIO_PATHS[i]);
+    document.getElementById('nlb').textContent = 'Audio file not found';
+    document.getElementById('nnm').textContent = AUDIO_PATHS[i];
+    document.getElementById('nnm').style.display = 'block';
+    return;
+  }
+
+  play(i);
+}
+
+hlEl.addEventListener('click', e => {
+  handleStonePress(e.clientX, e.clientY);
+});
+
+hlEl.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  handleStonePress(t.clientX, t.clientY);
+}, { passive: false });
 window.addEventListener('resize',setD);
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
 (async()=>{
