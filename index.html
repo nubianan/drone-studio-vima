@@ -165,7 +165,7 @@ function drawStream(t2){
 
   if(!streamOn||ci<0)return;
   const elapsed=performance.now()-streamStart,rawT=Math.min(1,elapsed/SWELL_MS);
-  const[fx,fy]=POS[ci];const sx=fx*W,sy=fy*H;
+  const[sx,sy]=scaleXY(ci);
   const pY=poolY();
   const maxH=pY-sy;
   const streamH=Math.max(4,maxH*(.08+.92*heightEase(rawT)));
