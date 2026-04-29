@@ -401,18 +401,14 @@ hlEl.addEventListener('click', async e => {
     return;
   }
 
-  await loadAll();
+  initA();
 
-  const prev = ci;
-  ci = i;
-
-  if (i !== prev) {
-    upTop(i);
-    stTim();
+  if (ac.state === 'suspended') {
+    await ac.resume();
   }
 
-  startStream(i);
-  play(i);
+  await loadAll();
+  await play(i);
 });
 
 hlEl.addEventListener('touchstart', async e => {
@@ -426,18 +422,14 @@ hlEl.addEventListener('touchstart', async e => {
     return;
   }
 
-  await loadAll();
+  initA();
 
-  const prev = ci;
-  ci = i;
-
-  if (i !== prev) {
-    upTop(i);
-    stTim();
+  if (ac.state === 'suspended') {
+    await ac.resume();
   }
 
-  startStream(i);
-  play(i);
+  await loadAll();
+  await play(i);
 }, { passive: false });
 window.addEventListener('resize',setD);
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
