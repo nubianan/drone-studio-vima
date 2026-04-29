@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,7 +40,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,sans-serif;backg
 <div id="app">
   <div id="top">
     <div id="dot"></div>
-    <div id="ntx"><div id="nlb">Touch the stone to begin</div><div id="nnm"></div></div>
+    <div id="ntx"><div id="nlb"></div><div id="nnm"></div></div>
     <div id="nrt"><span id="ntm"></span><button class="bp" id="sus">Sustain</button><button class="bp" id="sb">Stop</button></div>
   </div>
   <div id="scene">
@@ -55,6 +56,13 @@ const TEX_B64="/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUF
 'use strict';
 const SCALES=[{n:'A',label:'a-minor'},{n:'B',label:'b-minor'},{n:'C',label:'c-minor'},{n:'D',label:'d-minor'},{n:'E',label:'e-minor'},{n:'F',label:'f-minor'},{n:'G',label:'g-minor'}];
 const POS=[[.21,.17],[.71,.12],[.58,.38],[.83,.58],[.36,.74],[.14,.55],[.62,.85]];
+const POS_X_OFFSET_PX={C:20};
+function scaleXY(i){
+  const [fx,fy]=POS[i];
+  const x=fx*W+(POS_X_OFFSET_PX[SCALES[i].n]||0);
+  const y=fy*H;
+  return [x,y];
+}
 const AUDIO_PATHS=['audio/a-minor.mp3','audio/b-minor.mp3','audio/c-minor.mp3','audio/d-minor.mp3','audio/e-minor.mp3','audio/f-minor.mp3','audio/g-minor.mp3'];
 const bufs={};
 let ac=null,an=null,cs=null,cg=null,ci=-1,sus=false,fad=false,ts=null,tid=null;
@@ -68,7 +76,7 @@ const oc=document.getElementById('oc'),ox=oc.getContext('2d');
 
 function loadImg(b64,type){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src='data:image/'+type+';base64,'+b64;});}
 function initA(){if(ac)return;ac=new(window.AudioContext||window.webkitAudioContext)();an=ac.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.86;an.connect(ac.destination);}
-async function loadAll(){initA();for(let i=0;i<AUDIO_PATHS.length;i++){try{const r=await fetch(AUDIO_PATHS[i]);if(!r.ok)continue;bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}}}
+async function loadAll(){initA();for(let i=0;i<AUDIO_PATHS.length;i++){if(bufs[i])continue;try{const r=await fetch(AUDIO_PATHS[i]);if(!r.ok)continue;bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}}}
 
 async function play(idx){
   if(fad)return;initA();if(ac.state==='suspended')await ac.resume();
@@ -79,7 +87,7 @@ async function play(idx){
 }
 function stopA(){if(cs){try{cs.stop();}catch(e){}}if(cg){try{cg.disconnect();}catch(e){}}cs=null;cg=null;ci=-1;fad=false;streamOn=false;streamStart=null;stpTim();rsTop();}
 function upTop(i){const d=document.getElementById('dot');d.style.background='rgba(120,190,90,.85)';d.classList.add('on');document.getElementById('nlb').textContent='Now playing';const nm=document.getElementById('nnm');nm.textContent=SCALES[i].label;nm.style.display='block';document.getElementById('ntm').style.display='block';document.getElementById('sb').classList.add('on');}
-function rsTop(){const d=document.getElementById('dot');d.style.background='';d.classList.remove('on');document.getElementById('nlb').textContent='Touch the stone to begin';document.getElementById('nnm').style.display='none';document.getElementById('ntm').style.display='none';document.getElementById('ntm').textContent='';document.getElementById('sb').classList.remove('on');document.getElementById('stlbl').textContent='';}
+function rsTop(){const d=document.getElementById('dot');d.style.background='';d.classList.remove('on');document.getElementById('nlb').textContent='';document.getElementById('nnm').style.display='none';document.getElementById('ntm').style.display='none';document.getElementById('ntm').textContent='';document.getElementById('sb').classList.remove('on');document.getElementById('stlbl').textContent='';}
 function stTim(){stpTim();ts=Date.now();tid=setInterval(()=>{const e=Math.floor((Date.now()-ts)/1000),m=Math.floor(e/60),s=e%60;const el=document.getElementById('ntm');if(el)el.textContent=m+':'+(s+'').padStart(2,'0')+' / 10:00';},1000);}
 function stpTim(){if(tid){clearInterval(tid);tid=null;}}
 document.getElementById('sb').addEventListener('click',stopA);
@@ -349,9 +357,9 @@ function drawRelief(){
 
 const CR=22;
 function drawCrevices(t2){
-  if(shimActive){shimT+=.012;if(shimT<4){const sweep=(shimT%2)/2;POS.forEach(([fx,fy])=>{const x=fx*W,y=fy*H,dist=Math.abs(fx-sweep);const sa=Math.max(0,1-dist*5)*.65;if(sa<.005)return;ox.beginPath();ox.arc(x,y,CR*1.6,0,Math.PI*2);const sg=ox.createRadialGradient(x-CR*.3,y-CR*.3,0,x,y,CR*1.6);sg.addColorStop(0,`rgba(140,205,128,${sa*.52})`);sg.addColorStop(.5,`rgba(95,155,85,${sa*.18})`);sg.addColorStop(1,'rgba(75,125,68,0)');ox.fillStyle=sg;ox.fill();});}else{shimActive=false;document.getElementById('hint').style.opacity='0';}}
+  if(shimActive){shimT+=.012;if(shimT<4){const sweep=(shimT%2)/2;POS.forEach(([fx,fy],i)=>{const [x,y]=scaleXY(i),dist=Math.abs(fx-sweep);const sa=Math.max(0,1-dist*5)*.65;if(sa<.005)return;ox.beginPath();ox.arc(x,y,CR*1.6,0,Math.PI*2);const sg=ox.createRadialGradient(x-CR*.3,y-CR*.3,0,x,y,CR*1.6);sg.addColorStop(0,`rgba(140,205,128,${sa*.52})`);sg.addColorStop(.5,`rgba(95,155,85,${sa*.18})`);sg.addColorStop(1,'rgba(75,125,68,0)');ox.fillStyle=sg;ox.fill();});}else{shimActive=false;document.getElementById('hint').style.opacity='0';}}
   POS.forEach(([fx,fy],i)=>{
-    const x=fx*W,y=fy*H,isA=i===ci,isH=i===hi,bA=isA?.28:isH?.17:.065;
+    const [x,y]=scaleXY(i),isA=i===ci,isH=i===hi,bA=isA?.28:isH?.17:.065;
     const sdg=ox.createRadialGradient(x+CR*.22,y+CR*.22,0,x,y,CR*1.22);sdg.addColorStop(0,`rgba(1,5,2,${bA*2.6})`);sdg.addColorStop(.5,`rgba(3,10,4,${bA})`);sdg.addColorStop(1,'rgba(1,5,2,0)');ox.fillStyle=sdg;ox.beginPath();ox.ellipse(x,y,CR*1.22,CR*.92,0,0,Math.PI*2);ox.fill();
     const ivg=ox.createRadialGradient(x-CR*.22,y-CR*.18,0,x,y,CR*.8);ivg.addColorStop(0,`rgba(0,3,1,${bA*4.5})`);ivg.addColorStop(.45,`rgba(2,7,3,${bA*2.8})`);ivg.addColorStop(.82,`rgba(6,16,8,${bA})`);ivg.addColorStop(1,'rgba(6,16,8,0)');ox.fillStyle=ivg;ox.beginPath();ox.ellipse(x,y,CR*.8,CR*.62,Math.PI*.12,0,Math.PI*2);ox.fill();
     ox.beginPath();ox.ellipse(x,y-CR*.29,CR*.41,CR*.095,-.09,0,Math.PI*2);ox.fillStyle=`rgba(90,158,82,${isA?.14:isH?.09:.025})`;ox.fill();
@@ -361,11 +369,11 @@ function drawCrevices(t2){
     else if(isH){ox.fillStyle='rgba(0,4,1,.65)';ox.fillText(SCALES[i].n,lx+1.2,ly+1.8);ox.fillStyle='rgba(105,172,90,.22)';ox.fillText(SCALES[i].n,lx-.4,ly-.7);ox.fillStyle='rgba(110,185,95,.72)';ox.fillText(SCALES[i].n,lx,ly);}
     else{ox.fillStyle='rgba(0,4,1,.55)';ox.fillText(SCALES[i].n,lx+1,ly+1.6);ox.fillStyle='rgba(100,168,82,.22)';ox.fillText(SCALES[i].n,lx-.4,ly-.6);ox.fillStyle='rgba(82,148,68,.58)';ox.fillText(SCALES[i].n,lx,ly);}
   });
-  if(ci>=0){const[fx,fy]=POS[ci];const x=fx*W,y=fy*H,lY=fy>.78?y-CR*2.6:y+CR*2.0;ox.font=`600 ${CR*.28}px ${FONT}`;ox.textAlign='center';ox.textBaseline='top';ox.fillStyle='rgba(0,4,1,.55)';ox.fillText(SCALES[ci].label,x+.5,lY+1);ox.fillStyle='rgba(118,200,100,.60)';ox.fillText(SCALES[ci].label,x,lY);}
+  if(ci>=0){const[,fy]=POS[ci];const[x,y]=scaleXY(ci),lY=fy>.78?y-CR*2.6:y+CR*2.0;ox.font=`600 ${CR*.28}px ${FONT}`;ox.textAlign='center';ox.textBaseline='top';ox.fillStyle='rgba(0,4,1,.55)';ox.fillText(SCALES[ci].label,x+.5,lY+1);ox.fillStyle='rgba(118,200,100,.60)';ox.fillText(SCALES[ci].label,x,lY);}
 }
 
 function loop(){T+=.016;wx.clearRect(0,0,W,H);ox.clearRect(0,0,W,H);drawStream(T);drawCrevices(T);requestAnimationFrame(loop);}
-function hitTest(ex,ey){const rect=document.getElementById('scene').getBoundingClientRect();const scl=W/rect.width,mx=(ex-rect.left)*scl,my=(ey-rect.top)*scl;for(let i=0;i<7;i++){const[fx,fy]=POS[i];if(Math.hypot(mx-fx*W,my-fy*H)<CR*1.35)return i;}return -1;}
+function hitTest(ex,ey){const rect=document.getElementById('scene').getBoundingClientRect();const scl=W/rect.width,mx=(ex-rect.left)*scl,my=(ey-rect.top)*scl;for(let i=0;i<7;i++){const[x,y]=scaleXY(i);if(Math.hypot(mx-x,my-y)<CR*1.35)return i;}return -1;}
 const hlEl=document.getElementById('hl');
 hlEl.addEventListener('mousemove',e=>{const i=hitTest(e.clientX,e.clientY);hi=i;hlEl.style.cursor=i>=0?'pointer':'crosshair';document.getElementById('stlbl').textContent=i>=0?SCALES[i].label:'';});
 hlEl.addEventListener('mouseleave',()=>{hi=-1;document.getElementById('stlbl').textContent='';});
@@ -395,6 +403,38 @@ async function handleStonePress(clientX, clientY) {
 
   play(i);
 }
+
+async function playScaleByLetter(letter) {
+  const key = letter.toLowerCase();
+  const i = SCALES.findIndex(scale => scale.n.toLowerCase() === key);
+
+  if (i < 0) return;
+
+  initA();
+
+  if (ac.state === 'suspended') {
+    await ac.resume();
+  }
+
+  await loadAll();
+
+  if (!bufs[i]) {
+    console.error('Audio did not load:', AUDIO_PATHS[i]);
+    document.getElementById('nlb').textContent = 'Audio file not found';
+    document.getElementById('nnm').textContent = AUDIO_PATHS[i];
+    document.getElementById('nnm').style.display = 'block';
+    return;
+  }
+
+  play(i);
+}
+
+window.addEventListener('keydown', e => {
+  if (e.repeat) return;
+  const typingTarget = e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]');
+  if (typingTarget) return;
+  playScaleByLetter(e.key);
+});
 
 hlEl.addEventListener('click', e => {
   handleStonePress(e.clientX, e.clientY);
