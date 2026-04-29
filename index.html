@@ -68,7 +68,31 @@ const oc=document.getElementById('oc'),ox=oc.getContext('2d');
 
 function loadImg(b64,type){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src='data:image/'+type+';base64,'+b64;});}
 function initA(){if(ac)return;ac=new(window.AudioContext||window.webkitAudioContext)();an=ac.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.86;an.connect(ac.destination);}
-async function loadAll(){initA();for(let i=0;i<AUDIO_PATHS.length;i++){try{const r=await fetch(AUDIO_PATHS[i]);if(!r.ok)continue;bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}}}
+let audioLoaded = false;
+
+async function loadAll() {
+  if (audioLoaded) return;
+
+  initA();
+
+  for (let i = 0; i < AUDIO_PATHS.length; i++) {
+    try {
+      const r = await fetch(AUDIO_PATHS[i]);
+
+      if (!r.ok) {
+        console.error('Audio file not found:', AUDIO_PATHS[i], r.status);
+        continue;
+      }
+
+      bufs[i] = await ac.decodeAudioData(await r.arrayBuffer());
+      console.log('Loaded:', AUDIO_PATHS[i]);
+    } catch (e) {
+      console.error('Could not load audio:', AUDIO_PATHS[i], e);
+    }
+  }
+
+  audioLoaded = true;
+}
 
 async function play(idx){
   if(fad)return;initA();if(ac.state==='suspended')await ac.resume();
