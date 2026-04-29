@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Drone Studio" />
   <meta name="theme-color" content="#0e1a14" />
@@ -21,13 +21,12 @@
       overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #0e1a14;
-      color: #d9e8c9;
+      color: #e7f0dc;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
 
-    button,
-    label {
+    button {
       font: inherit;
     }
 
@@ -36,63 +35,63 @@
       display: flex;
       flex-direction: column;
       background:
-        radial-gradient(circle at 20% 10%, rgba(130, 190, 110, 0.12), transparent 24%),
-        radial-gradient(circle at 80% 60%, rgba(120, 88, 55, 0.14), transparent 28%),
-        linear-gradient(180deg, #0e1a14 0%, #08120d 100%);
+        radial-gradient(circle at 18% 15%, rgba(144, 196, 118, 0.18), transparent 28%),
+        radial-gradient(circle at 80% 72%, rgba(164, 107, 68, 0.14), transparent 34%),
+        linear-gradient(180deg, #0e1a14 0%, #07110b 100%);
     }
 
     #top {
       flex-shrink: 0;
+      min-height: 56px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px 14px;
       background: rgba(8, 18, 10, 0.97);
-      border-bottom: 0.5px solid rgba(90, 140, 80, 0.18);
-      min-height: 52px;
+      border-bottom: 1px solid rgba(120, 170, 95, 0.14);
       z-index: 10;
     }
 
     #dot {
       width: 8px;
       height: 8px;
-      border-radius: 50%;
-      background: rgba(90, 140, 80, 0.25);
       flex-shrink: 0;
-      transition: background 0.3s;
+      border-radius: 999px;
+      background: rgba(120, 170, 95, 0.28);
+      transition: background 0.2s ease;
     }
 
-    #dot.on {
-      background: rgba(155, 210, 120, 0.9);
-      animation: pulse 2.5s ease-in-out infinite;
+    #dot.playing {
+      background: #b8e58b;
+      animation: pulse 2.4s ease-in-out infinite;
     }
 
     @keyframes pulse {
       0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.85); opacity: 0.35; }
+      50% { transform: scale(1.9); opacity: 0.36; }
     }
 
-    #statusText {
+    #status {
       flex: 1;
       min-width: 0;
     }
 
     #statusLabel {
       font-size: 10px;
-      letter-spacing: 0.13em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: rgba(160, 210, 135, 0.45);
+      color: rgba(169, 215, 139, 0.48);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
     #nowPlaying {
-      font-size: 13px;
-      color: #d9e8c9;
       display: none;
-      font-style: italic;
       margin-top: 2px;
+      font-size: 13px;
+      color: #dcebcf;
+      font-style: italic;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -101,110 +100,114 @@
     #controls {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
       flex-shrink: 0;
     }
 
     #timer {
-      font-size: 11px;
-      color: rgba(170, 220, 140, 0.4);
-      font-variant-numeric: tabular-nums;
       display: none;
-      min-width: 72px;
+      min-width: 55px;
       text-align: right;
+      font-size: 11px;
+      color: rgba(169, 215, 139, 0.45);
+      font-variant-numeric: tabular-nums;
     }
 
-    .pillButton {
-      font-size: 10px;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      padding: 6px 11px;
+    .controlButton {
+      border: 1px solid rgba(130, 185, 100, 0.2);
+      background: rgba(130, 185, 100, 0.06);
+      color: rgba(195, 235, 165, 0.76);
       border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       cursor: pointer;
-      border: 0.5px solid rgba(90, 140, 80, 0.22);
-      background: rgba(90, 140, 80, 0.06);
-      color: rgba(170, 220, 140, 0.65);
+      transition: all 0.18s ease;
       -webkit-appearance: none;
-      transition: all 0.2s;
     }
 
-    .pillButton:hover {
-      background: rgba(90, 140, 80, 0.12);
-      color: rgba(205, 245, 175, 0.95);
+    .controlButton:hover {
+      background: rgba(130, 185, 100, 0.12);
+      color: #e7f6d9;
     }
 
-    .pillButton.on {
-      color: #b9e492;
-      border-color: rgba(130, 190, 95, 0.5);
-      background: rgba(90, 140, 80, 0.13);
+    .controlButton.active {
+      border-color: rgba(184, 229, 139, 0.55);
+      color: #c7f09d;
+      background: rgba(130, 185, 100, 0.15);
     }
 
     #stopButton {
-      color: #d5a077;
-      border-color: rgba(160, 110, 70, 0.28);
-      background: rgba(150, 80, 50, 0.08);
       display: none;
+      border-color: rgba(210, 130, 80, 0.28);
+      color: rgba(230, 172, 125, 0.86);
+      background: rgba(210, 100, 70, 0.08);
     }
 
-    #stopButton.on {
-      display: block;
+    #stopButton.visible {
+      display: inline-block;
     }
 
     #scene {
-      flex: 1;
       position: relative;
+      flex: 1;
       overflow: hidden;
       display: grid;
       place-items: center;
-      padding: 18px;
+      padding: 20px;
     }
 
-    #visualizer {
+    #backgroundCanvas {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      opacity: 0.9;
+      opacity: 0.95;
     }
 
     #panel {
       position: relative;
       z-index: 2;
-      width: min(720px, 100%);
-      border: 1px solid rgba(180, 225, 145, 0.12);
-      background: rgba(8, 18, 10, 0.68);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 30px 120px rgba(0, 0, 0, 0.35);
-      border-radius: 28px;
-      padding: 22px;
-    }
-
-    #titleBlock {
-      margin-bottom: 18px;
+      width: min(760px, 100%);
+      padding: 24px;
+      border-radius: 30px;
+      border: 1px solid rgba(198, 235, 160, 0.12);
+      background: rgba(7, 17, 11, 0.72);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 28px 110px rgba(0, 0, 0, 0.36);
     }
 
     #eyebrow {
+      margin-bottom: 8px;
       font-size: 10px;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(170, 220, 140, 0.45);
-      margin-bottom: 7px;
+      color: rgba(184, 229, 139, 0.46);
     }
 
     h1 {
-      font-size: clamp(26px, 5vw, 48px);
-      line-height: 0.95;
-      letter-spacing: -0.05em;
-      color: #e6efd8;
-      font-weight: 600;
+      font-size: clamp(30px, 6vw, 56px);
+      line-height: 0.92;
+      letter-spacing: -0.06em;
+      font-weight: 650;
+      color: #eef7e5;
     }
 
     #instructions {
-      margin-top: 10px;
-      max-width: 52ch;
-      font-size: 13px;
-      line-height: 1.45;
-      color: rgba(220, 238, 205, 0.64);
+      margin-top: 12px;
+      margin-bottom: 22px;
+      max-width: 56ch;
+      font-size: 14px;
+      line-height: 1.48;
+      color: rgba(222, 238, 205, 0.68);
+    }
+
+    code {
+      color: #c7f09d;
+      background: rgba(184, 229, 139, 0.08);
+      padding: 1px 5px;
+      border-radius: 6px;
     }
 
     #scaleGrid {
@@ -213,130 +216,98 @@
       gap: 10px;
     }
 
-    .scaleCard {
-      min-width: 0;
-    }
-
     .scaleButton {
       width: 100%;
       aspect-ratio: 1 / 1;
-      border-radius: 22px;
-      border: 1px solid rgba(170, 220, 140, 0.14);
+      min-height: 92px;
+      border-radius: 24px;
+      border: 1px solid rgba(198, 235, 160, 0.14);
       background:
-        radial-gradient(circle at 35% 20%, rgba(230, 255, 190, 0.14), transparent 30%),
-        rgba(95, 120, 75, 0.11);
-      color: #dceacb;
+        radial-gradient(circle at 33% 20%, rgba(240, 255, 210, 0.13), transparent 34%),
+        rgba(130, 160, 95, 0.1);
+      color: #e7f0dc;
       cursor: pointer;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
-      gap: 5px;
-      transition: transform 0.18s, border-color 0.18s, background 0.18s, box-shadow 0.18s;
+      justify-content: center;
+      gap: 7px;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
     }
 
     .scaleButton:hover {
       transform: translateY(-2px);
-      border-color: rgba(190, 240, 150, 0.34);
+      border-color: rgba(198, 235, 160, 0.34);
       background:
-        radial-gradient(circle at 35% 20%, rgba(230, 255, 190, 0.2), transparent 30%),
-        rgba(115, 145, 85, 0.16);
+        radial-gradient(circle at 33% 20%, rgba(240, 255, 210, 0.22), transparent 34%),
+        rgba(130, 160, 95, 0.16);
     }
 
     .scaleButton.active {
-      border-color: rgba(190, 240, 150, 0.78);
-      box-shadow: 0 0 0 1px rgba(190, 240, 150, 0.12), 0 20px 60px rgba(145, 200, 95, 0.18);
+      border-color: rgba(198, 235, 160, 0.8);
       background:
-        radial-gradient(circle at 35% 20%, rgba(240, 255, 200, 0.28), transparent 30%),
-        rgba(125, 175, 88, 0.24);
+        radial-gradient(circle at 33% 20%, rgba(240, 255, 210, 0.31), transparent 34%),
+        rgba(140, 190, 95, 0.24);
+      box-shadow: 0 0 0 1px rgba(198, 235, 160, 0.12), 0 20px 70px rgba(148, 205, 105, 0.18);
     }
 
     .scaleLetter {
-      font-size: clamp(24px, 5vw, 42px);
+      font-size: clamp(28px, 5vw, 44px);
       line-height: 1;
-      font-weight: 600;
+      font-weight: 700;
     }
 
-    .scaleName {
+    .scaleLabel {
       font-size: 9px;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: rgba(220, 238, 205, 0.6);
-    }
-
-    .fileLabel {
-      margin-top: 7px;
-      display: block;
-      width: 100%;
-      cursor: pointer;
-      font-size: 9px;
-      line-height: 1.2;
-      text-align: center;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: rgba(210, 230, 190, 0.42);
-      border: 0.5px solid rgba(170, 220, 140, 0.11);
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 999px;
-      padding: 6px 7px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .fileLabel.loaded {
-      color: rgba(205, 245, 175, 0.82);
-      border-color: rgba(170, 220, 140, 0.24);
-      background: rgba(120, 170, 90, 0.1);
-    }
-
-    .fileInput {
-      display: none;
+      color: rgba(222, 238, 205, 0.58);
     }
 
     #bottom {
       flex-shrink: 0;
+      min-height: 42px;
+      padding: 8px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 8px 14px;
       background: rgba(8, 18, 10, 0.97);
-      border-top: 0.5px solid rgba(90, 140, 80, 0.1);
-      min-height: 42px;
+      border-top: 1px solid rgba(120, 170, 95, 0.1);
       z-index: 10;
     }
 
     #hint,
-    #hoverLabel {
+    #fileStatus {
       font-size: 10px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: rgba(160, 210, 135, 0.35);
+      color: rgba(169, 215, 139, 0.34);
     }
 
-    #hoverLabel {
+    #fileStatus {
       text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    @media (max-width: 720px) {
+    @media (max-width: 780px) {
       #scene {
-        padding: 12px;
+        padding: 14px;
       }
 
       #panel {
-        border-radius: 22px;
-        padding: 16px;
+        padding: 18px;
+        border-radius: 24px;
       }
 
       #scaleGrid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
+    }
 
-      .scaleButton {
-        border-radius: 18px;
-      }
-
+    @media (max-width: 480px) {
       #top {
         align-items: flex-start;
       }
@@ -345,15 +316,17 @@
         flex-wrap: wrap;
         justify-content: flex-end;
       }
-    }
 
-    @media (max-width: 430px) {
+      #timer {
+        display: none !important;
+      }
+
       #scaleGrid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      #timer {
-        display: none !important;
+      .scaleButton {
+        min-height: 108px;
       }
     }
   </style>
@@ -363,28 +336,28 @@
   <div id="app">
     <header id="top">
       <div id="dot"></div>
-      <div id="statusText">
-        <div id="statusLabel">Load audio or tap a scale</div>
+
+      <div id="status">
+        <div id="statusLabel">Tap a scale to begin</div>
         <div id="nowPlaying"></div>
       </div>
+
       <div id="controls">
         <span id="timer"></span>
-        <button class="pillButton" id="sustainButton" type="button">Sustain</button>
-        <button class="pillButton" id="stopButton" type="button">Stop</button>
+        <button id="sustainButton" class="controlButton" type="button">Sustain</button>
+        <button id="stopButton" class="controlButton" type="button">Stop</button>
       </div>
     </header>
 
     <main id="scene">
-      <canvas id="visualizer"></canvas>
+      <canvas id="backgroundCanvas"></canvas>
 
-      <section id="panel" aria-label="Drone scale player">
-        <div id="titleBlock">
-          <div id="eyebrow">Drone Studio</div>
-          <h1>Seven Scale Player</h1>
-          <p id="instructions">
-            Click a scale button to play its matching audio file. Use the small “choose file” pills to test local files, or replace the file paths in <code>AUDIO_PATHS</code> for a deployed version.
-          </p>
-        </div>
+      <section id="panel" aria-label="Seven scale drone player">
+        <div id="eyebrow">Drone Studio</div>
+        <h1>Seven Scale Drone Player</h1>
+        <p id="instructions">
+          Put your seven audio files in an <code>audio</code> folder beside this file. Then click a scale button to play the matching drone.
+        </p>
 
         <div id="scaleGrid"></div>
       </section>
@@ -392,344 +365,258 @@
 
     <footer id="bottom">
       <span id="hint">One scale plays at a time</span>
-      <span id="hoverLabel"></span>
+      <span id="fileStatus">audio folder required</span>
     </footer>
   </div>
 
   <script>
     'use strict';
 
-    /*****************************************************************
-     * 1. PUT YOUR 7 AUDIO FILES HERE
+    /**************************************************************
+     * CHANGE ONLY THIS SECTION IF YOUR FILE NAMES ARE DIFFERENT.
      *
-     * For a deployed website, place your audio files in an /audio folder
-     * beside this HTML file and update these paths.
+     * GitHub repo structure should be:
      *
-     * Example folder:
      *   index.html
-     *   audio/a-minor.mp3
-     *   audio/b-minor.mp3
-     *   audio/c-minor.mp3
-     *   audio/d-minor.mp3
-     *   audio/e-minor.mp3
-     *   audio/f-minor.mp3
-     *   audio/g-minor.mp3
-     *****************************************************************/
-    const AUDIO_PATHS = [
-      'audio/A MINOR.mp3',
-      'audio/B MINOR.mp3',
-      'audio/C MINOR.mp3',
-      'audio/D MINOR.mp3',
-      'audio/E MINOR.mp3',
-      'audio/F MINOR.mp3',
-      'audio/G MINOR.mp3'
-    ];
+     *   audio/
+     *     a-minor.mp3
+     *     b-minor.mp3
+     *     c-minor.mp3
+     *     d-minor.mp3
+     *     e-minor.mp3
+     *     f-minor.mp3
+     *     g-minor.mp3
+     **************************************************************/
 
-    /*****************************************************************
-     * 2. SCALE LABELS
-     *
-     * These match the audio paths above by index:
-     * A MINOR uses AUDIO_PATHS[0], B MINOR uses AUDIO_PATHS[1], etc.
-     *****************************************************************/
     const SCALES = [
-      { note: 'A', label: 'A MINOR' },
-      { note: 'B', label: 'B MINOR' },
-      { note: 'C', label: 'C MINOR' },
-      { note: 'D', label: 'D MINOR' },
-      { note: 'E', label: 'E MINOR' },
-      { note: 'F', label: 'F MINOR' },
-      { note: 'G', label: 'G MINOR' }
+      { note: 'A', name: 'A Minor', file: 'audio/a-minor.mp3' },
+      { note: 'B', name: 'B Minor', file: 'audio/b-minor.mp3' },
+      { note: 'C', name: 'C Minor', file: 'audio/c-minor.mp3' },
+      { note: 'D', name: 'D Minor', file: 'audio/d-minor.mp3' },
+      { note: 'E', name: 'E Minor', file: 'audio/e-minor.mp3' },
+      { note: 'F', name: 'F Minor', file: 'audio/f-minor.mp3' },
+      { note: 'G', name: 'G Minor', file: 'audio/g-minor.mp3' }
     ];
 
-    const CROSSFADE_SECONDS = 2.5;
-    const RESTART_FADE_SECONDS = 0.4;
-    const SESSION_LENGTH_SECONDS = 10 * 60;
+    /**************************************************************
+     * APP LOGIC. YOU SHOULD NOT NEED TO CHANGE BELOW THIS LINE.
+     **************************************************************/
 
-    let audioContext = null;
-    let analyser = null;
-    let currentSource = null;
-    let currentGain = null;
-    let currentScaleIndex = -1;
-    let isFading = false;
-    let sustain = false;
-    let startedAt = null;
-    let timerInterval = null;
-    let animationFrame = null;
-
-    const decodedBuffers = new Map();
-    const localFiles = new Map();
-
-    const scaleGrid = document.getElementById('scaleGrid');
     const dot = document.getElementById('dot');
     const statusLabel = document.getElementById('statusLabel');
     const nowPlaying = document.getElementById('nowPlaying');
     const timer = document.getElementById('timer');
     const stopButton = document.getElementById('stopButton');
     const sustainButton = document.getElementById('sustainButton');
-    const hoverLabel = document.getElementById('hoverLabel');
-    const canvas = document.getElementById('visualizer');
+    const scaleGrid = document.getElementById('scaleGrid');
+    const fileStatus = document.getElementById('fileStatus');
+    const canvas = document.getElementById('backgroundCanvas');
     const ctx = canvas.getContext('2d');
 
-    function initAudio() {
-      if (audioContext) return;
+    let currentAudio = null;
+    let currentIndex = -1;
+    let sustainOn = false;
+    let timerId = null;
+    let startedAt = 0;
+    let animationId = null;
 
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      audioContext = new AudioContextClass();
+    function buildScaleButtons() {
+      SCALES.forEach((scale, index) => {
+        const button = document.createElement('button');
+        button.className = 'scaleButton';
+        button.type = 'button';
+        button.dataset.index = String(index);
+        button.setAttribute('aria-label', `Play ${scale.name}`);
+        button.innerHTML = `
+          <span class="scaleLetter">${scale.note}</span>
+          <span class="scaleLabel">${scale.name}</span>
+        `;
 
-      analyser = audioContext.createAnalyser();
-      analyser.fftSize = 2048;
-      analyser.smoothingTimeConstant = 0.86;
-      analyser.connect(audioContext.destination);
-    }
+        button.addEventListener('click', () => {
+          playScale(index);
+        });
 
-    async function getAudioBuffer(index) {
-      initAudio();
-
-      const localFile = localFiles.get(index);
-      const cacheKey = localFile
-        ? `local:${index}:${localFile.name}:${localFile.size}:${localFile.lastModified}`
-        : `path:${AUDIO_PATHS[index]}`;
-
-      if (decodedBuffers.has(cacheKey)) {
-        return decodedBuffers.get(cacheKey);
-      }
-
-      let arrayBuffer;
-
-      if (localFile) {
-        arrayBuffer = await localFile.arrayBuffer();
-      } else {
-        const response = await fetch(AUDIO_PATHS[index]);
-
-        if (!response.ok) {
-          throw new Error(`Could not load ${AUDIO_PATHS[index]}`);
-        }
-
-        arrayBuffer = await response.arrayBuffer();
-      }
-
-      const decoded = await audioContext.decodeAudioData(arrayBuffer);
-      decodedBuffers.set(cacheKey, decoded);
-      return decoded;
-    }
-
-    async function playScale(index) {
-      if (isFading) return;
-
-      initAudio();
-
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-
-      let buffer;
-
-      try {
-        setLoadingState(index);
-        buffer = await getAudioBuffer(index);
-      } catch (error) {
-        console.error(error);
-        setErrorState(index, error);
-        return;
-      }
-
-      const sameScale = index === currentScaleIndex;
-      const fadeDuration = sameScale ? RESTART_FADE_SECONDS : CROSSFADE_SECONDS;
-
-      isFading = true;
-
-      const nextGain = audioContext.createGain();
-      nextGain.gain.setValueAtTime(0, audioContext.currentTime);
-      nextGain.connect(analyser);
-
-      const nextSource = audioContext.createBufferSource();
-      nextSource.buffer = buffer;
-      nextSource.loop = sustain;
-      nextSource.connect(nextGain);
-
-      if (currentGain && currentSource) {
-        currentGain.gain.cancelScheduledValues(audioContext.currentTime);
-        currentGain.gain.setValueAtTime(currentGain.gain.value, audioContext.currentTime);
-        currentGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + fadeDuration);
-
-        const oldSource = currentSource;
-        const oldGain = currentGain;
-
-        window.setTimeout(() => {
-          try { oldSource.stop(); } catch (error) {}
-          try { oldGain.disconnect(); } catch (error) {}
-        }, (fadeDuration + 0.25) * 1000);
-      }
-
-      nextGain.gain.linearRampToValueAtTime(1, audioContext.currentTime + fadeDuration);
-      nextSource.start(0);
-
-      currentSource = nextSource;
-      currentGain = nextGain;
-      currentScaleIndex = index;
-
-      setPlayingState(index);
-      startTimer();
-      drawVisualizer();
-
-      window.setTimeout(() => {
-        isFading = false;
-      }, fadeDuration * 1000);
-
-      nextSource.onended = () => {
-        if (currentSource === nextSource && !sustain) {
-          stopAudio();
-        }
-      };
-    }
-
-    function stopAudio() {
-      if (currentSource) {
-        try { currentSource.stop(); } catch (error) {}
-      }
-
-      if (currentGain) {
-        try { currentGain.disconnect(); } catch (error) {}
-      }
-
-      currentSource = null;
-      currentGain = null;
-      currentScaleIndex = -1;
-      isFading = false;
-      startedAt = null;
-
-      stopTimer();
-      setIdleState();
-    }
-
-    function setLoadingState(index) {
-      statusLabel.textContent = 'Loading audio';
-      nowPlaying.textContent = SCALES[index].label;
-      nowPlaying.style.display = 'block';
-    }
-
-    function setPlayingState(index) {
-      dot.classList.add('on');
-      statusLabel.textContent = 'Now playing';
-      nowPlaying.textContent = SCALES[index].label;
-      nowPlaying.style.display = 'block';
-      timer.style.display = 'inline';
-      stopButton.classList.add('on');
-
-      document.querySelectorAll('.scaleButton').forEach((button, buttonIndex) => {
-        button.classList.toggle('active', buttonIndex === index);
+        scaleGrid.appendChild(button);
       });
     }
 
-    function setIdleState() {
-      dot.classList.remove('on');
-      statusLabel.textContent = 'Load audio or tap a scale';
-      nowPlaying.style.display = 'none';
-      nowPlaying.textContent = '';
+    function playScale(index) {
+      const scale = SCALES[index];
+
+      if (!scale) return;
+
+      stopAudio(false);
+
+      const audio = new Audio();
+      audio.src = scale.file;
+      audio.preload = 'auto';
+      audio.loop = sustainOn;
+      audio.volume = 1;
+
+      currentAudio = audio;
+      currentIndex = index;
+
+      setLoadingState(scale);
+
+      audio.addEventListener('canplay', () => {
+        if (currentAudio === audio) {
+          fileStatus.textContent = scale.file;
+        }
+      });
+
+      audio.addEventListener('ended', () => {
+        if (currentAudio === audio && !sustainOn) {
+          stopAudio(true);
+        }
+      });
+
+      audio.addEventListener('error', () => {
+        if (currentAudio !== audio) return;
+
+        const message = getAudioErrorMessage(audio);
+        setErrorState(scale, message);
+        stopAudio(false);
+      });
+
+      audio.play()
+        .then(() => {
+          if (currentAudio === audio) {
+            setPlayingState(scale, index);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          setErrorState(scale, error.message || 'Playback failed');
+          stopAudio(false);
+        });
+    }
+
+    function stopAudio(resetStatus = true) {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio.src = '';
+        currentAudio.load();
+      }
+
+      currentAudio = null;
+      currentIndex = -1;
+      stopTimer();
+      clearActiveButtons();
+
+      dot.classList.remove('playing');
+      stopButton.classList.remove('visible');
       timer.style.display = 'none';
       timer.textContent = '';
-      stopButton.classList.remove('on');
 
+      if (resetStatus) {
+        statusLabel.textContent = 'Tap a scale to begin';
+        nowPlaying.style.display = 'none';
+        nowPlaying.textContent = '';
+        fileStatus.textContent = 'audio folder required';
+      }
+    }
+
+    function setLoadingState(scale) {
+      statusLabel.textContent = 'Loading audio';
+      nowPlaying.textContent = scale.name;
+      nowPlaying.style.display = 'block';
+      fileStatus.textContent = scale.file;
+    }
+
+    function setPlayingState(scale, index) {
+      statusLabel.textContent = 'Now playing';
+      nowPlaying.textContent = scale.name;
+      nowPlaying.style.display = 'block';
+      dot.classList.add('playing');
+      stopButton.classList.add('visible');
+      timer.style.display = 'inline';
+
+      clearActiveButtons();
+      const activeButton = document.querySelector(`.scaleButton[data-index="${index}"]`);
+      if (activeButton) activeButton.classList.add('active');
+
+      startTimer();
+    }
+
+    function setErrorState(scale, message) {
+      statusLabel.textContent = 'Could not play audio';
+      nowPlaying.textContent = `${scale.name} — check ${scale.file}`;
+      nowPlaying.style.display = 'block';
+      fileStatus.textContent = message;
+    }
+
+    function clearActiveButtons() {
       document.querySelectorAll('.scaleButton').forEach((button) => {
         button.classList.remove('active');
       });
     }
 
-    function setErrorState(index, error) {
-      dot.classList.remove('on');
-      statusLabel.textContent = 'Audio file missing or unreadable';
-      nowPlaying.textContent = `${SCALES[index].label}: ${AUDIO_PATHS[index]}`;
-      nowPlaying.style.display = 'block';
-      stopButton.classList.remove('on');
-      isFading = false;
+    function getAudioErrorMessage(audio) {
+      if (!audio.error) return 'Unknown audio error';
+
+      switch (audio.error.code) {
+        case MediaError.MEDIA_ERR_ABORTED:
+          return 'Audio load was aborted';
+        case MediaError.MEDIA_ERR_NETWORK:
+          return 'Network error loading audio';
+        case MediaError.MEDIA_ERR_DECODE:
+          return 'Audio format could not be decoded';
+        case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+          return 'File missing or format not supported';
+        default:
+          return 'Unknown audio error';
+      }
     }
 
     function startTimer() {
       stopTimer();
       startedAt = Date.now();
-
-      function updateTimer() {
-        const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
-        const minutes = Math.floor(elapsedSeconds / 60);
-        const seconds = elapsedSeconds % 60;
-        const totalMinutes = Math.floor(SESSION_LENGTH_SECONDS / 60);
-
-        timer.textContent = `${minutes}:${String(seconds).padStart(2, '0')} / ${totalMinutes}:00`;
-      }
-
       updateTimer();
-      timerInterval = window.setInterval(updateTimer, 1000);
+      timerId = window.setInterval(updateTimer, 1000);
     }
 
     function stopTimer() {
-      if (timerInterval) {
-        window.clearInterval(timerInterval);
-        timerInterval = null;
+      if (timerId) {
+        window.clearInterval(timerId);
+        timerId = null;
       }
     }
 
-    function buildScaleUI() {
-      SCALES.forEach((scale, index) => {
-        const card = document.createElement('div');
-        card.className = 'scaleCard';
-
-        const button = document.createElement('button');
-        button.className = 'scaleButton';
-        button.type = 'button';
-        button.setAttribute('aria-label', `Play ${scale.label}`);
-        button.innerHTML = `
-          <span class="scaleLetter">${scale.note}</span>
-          <span class="scaleName">${scale.label}</span>
-        `;
-
-        button.addEventListener('click', () => playScale(index));
-        button.addEventListener('mouseenter', () => {
-          hoverLabel.textContent = scale.label;
-        });
-        button.addEventListener('mouseleave', () => {
-          hoverLabel.textContent = '';
-        });
-
-        const fileInput = document.createElement('input');
-        fileInput.className = 'fileInput';
-        fileInput.type = 'file';
-        fileInput.accept = 'audio/*';
-        fileInput.id = `file-${index}`;
-
-        const fileLabel = document.createElement('label');
-        fileLabel.className = 'fileLabel';
-        fileLabel.setAttribute('for', fileInput.id);
-        fileLabel.textContent = 'Choose file';
-        fileLabel.title = `Optional local file for ${scale.label}`;
-
-        fileInput.addEventListener('change', () => {
-          const file = fileInput.files && fileInput.files[0];
-          if (!file) return;
-
-          localFiles.set(index, file);
-          fileLabel.textContent = file.name;
-          fileLabel.classList.add('loaded');
-
-          if (currentScaleIndex === index) {
-            stopAudio();
-          }
-        });
-
-        card.appendChild(button);
-        card.appendChild(fileLabel);
-        card.appendChild(fileInput);
-        scaleGrid.appendChild(card);
-      });
+    function updateTimer() {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      timer.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
     }
 
+    sustainButton.addEventListener('click', () => {
+      sustainOn = !sustainOn;
+      sustainButton.classList.toggle('active', sustainOn);
+      sustainButton.textContent = sustainOn ? 'Sustain on' : 'Sustain';
+
+      if (currentAudio) {
+        currentAudio.loop = sustainOn;
+      }
+    });
+
+    stopButton.addEventListener('click', () => {
+      stopAudio(true);
+    });
+
     function resizeCanvas() {
-      const ratio = window.devicePixelRatio || 1;
-      canvas.width = Math.floor(canvas.clientWidth * ratio);
-      canvas.height = Math.floor(canvas.clientHeight * ratio);
-      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      const pixelRatio = window.devicePixelRatio || 1;
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+
+      canvas.width = Math.floor(width * pixelRatio);
+      canvas.height = Math.floor(height * pixelRatio);
+      ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     }
 
     function drawBackground(time = 0) {
+      resizeCanvas();
+
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
 
@@ -737,30 +624,75 @@
 
       const gradient = ctx.createRadialGradient(
         width * 0.5,
-        height * 0.5,
-        10,
+        height * 0.45,
+        20,
         width * 0.5,
         height * 0.5,
-        Math.max(width, height) * 0.7
+        Math.max(width, height) * 0.78
       );
 
-      gradient.addColorStop(0, 'rgba(40, 68, 38, 0.34)');
-      gradient.addColorStop(0.45, 'rgba(16, 31, 20, 0.7)');
-      gradient.addColorStop(1, 'rgba(5, 12, 8, 1)');
+      gradient.addColorStop(0, 'rgba(65, 98, 54, 0.38)');
+      gradient.addColorStop(0.46, 'rgba(17, 34, 21, 0.86)');
+      gradient.addColorStop(1, 'rgba(5, 11, 7, 1)');
+
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
 
       ctx.save();
-      ctx.globalAlpha = 0.13;
-      ctx.strokeStyle = 'rgba(210, 235, 180, 0.5)';
+      ctx.globalAlpha = currentAudio ? 0.22 : 0.12;
+      ctx.strokeStyle = 'rgba(221, 242, 194, 0.52)';
       ctx.lineWidth = 1;
 
-      for (let i = 0; i < 26; i++) {
-        const y = (height / 26) * i;
-        const offset = Math.sin(time * 0.00025 + i * 0.8) * 20;
+      const lineCount = 28;
+      for (let i = 0; i < lineCount; i++) {
+        const y = (height / (lineCount - 1)) * i;
+        const wave = Math.sin(time * 0.0006 + i * 0.52) * (currentAudio ? 18 : 8);
 
         ctx.beginPath();
-        ctx.moveTo(-20, y + offset);
+        for (let x = -30; x <= width + 30; x += 24) {
+          const yy = y + wave + Math.sin(x * 0.015 + time * 0.0008 + i) * 8;
+          if (x === -30) ctx.moveTo(x, yy);
+          else ctx.lineTo(x, yy);
+        }
+        ctx.stroke();
+      }
 
-        for (let x = -20; x <= width + 20; x += 40) {
-          ctx.lineTo(x, y + offset + Math.sin(x * 0.012 + time * 0.0005 + i) * 10)
+      if (currentAudio) {
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = Math.min(width, height) * 0.16 + Math.sin(time * 0.002) * 9;
+
+        ctx.globalAlpha = 0.5;
+        ctx.strokeStyle = 'rgba(198, 235, 160, 0.68)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+
+        const points = 96;
+        for (let i = 0; i <= points; i++) {
+          const angle = (Math.PI * 2 * i) / points;
+          const wobble = Math.sin(time * 0.0015 + i * 0.35) * 14;
+          const r = radius + wobble;
+          const x = centerX + Math.cos(angle) * r;
+          const y = centerY + Math.sin(angle) * r;
+
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      ctx.restore();
+
+      animationId = window.requestAnimationFrame(drawBackground);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    buildScaleButtons();
+    resizeCanvas();
+    drawBackground();
+  </script>
+</body>
+</html>
