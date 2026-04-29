@@ -245,13 +245,8 @@ function drawStagnantPool(t2){
 // ── ACTIVE STREAM + DISTURBANCE EFFECTS ──────────────────────────────
 function drawStream(t2){
   wx.clearRect(0,0,W,H);
-
-  function drawStream(t2){
-  wx.clearRect(0,0,W,H);
-  drawFog(t2);          // ← ADD THIS LINE
+  drawFog(t2);          
   drawStagnantPool(t2);
-  // ... rest of function unchanged
-
   // Pool is ALWAYS drawn first
   drawStagnantPool(t2);
 
