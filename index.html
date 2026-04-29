@@ -67,6 +67,92 @@ const AUDIO_PATHS=['audio/a-minor.mp3','audio/b-minor.mp3','audio/c-minor.mp3','
 const bufs={};
 let ac=null,an=null,cs=null,cg=null,ci=-1,sus=false,fad=false,ts=null,tid=null;
 let hi=-1,T=0,W=0,H=0,shimT=0,shimActive=true,streamOn=false,streamStart=null;
+
+// ── FOG SYSTEM ──────────────────────────────────────────────────────────
+const fogParticles=[];
+let fogRightTimer=0,fogLeftTimer=0;
+const FOG_RIGHT_INTERVAL=5,FOG_LEFT_INTERVAL=10;
+
+function spawnFog(side){
+  const count=3+Math.floor(Math.random()*3);
+  for(let i=0;i<count;i++){
+    const r=120+Math.random()*180;
+    const y=H-(Math.random()*POOL_RAISE*1.2);
+    const x=side==='right'?W+(r*0.5)+Math.random()*80:-(r*0.5)-Math.random()*80;
+    fogParticles.push({
+      x,y,r,
+      vx:side==='right'?-(0.18+Math.random()*0.22):(0.18+Math.random()*0.22),
+      vy:-(0.08+Math.random()*0.12),
+      life:0,
+      maxLife:420+Math.random()*180,
+      side,
+      wobble:Math.random()*Math.PI*2,
+      wobbleSpeed:0.004+Math.random()*0.004
+    });
+  }
+}
+
+function drawFog(t2){
+  // tick timers
+  fogRightTimer+=1/60;
+  fogLeftTimer+=1/60;
+  if(fogRightTimer>=FOG_RIGHT_INTERVAL){fogRightTimer=0;spawnFog('right');}
+  if(fogLeftTimer>=FOG_LEFT_INTERVAL){fogLeftTimer=0;spawnFog('left');}
+
+  // find overlap zone x-range for density boost
+  const rightParticles=fogParticles.filter(p=>p.side==='right'&&p.life>30);
+  const leftParticles=fogParticles.filter(p=>p.side==='left'&&p.life>30);
+
+  for(let i=fogParticles.length-1;i>=0;i--){
+    const p=fogParticles[i];
+    p.life++;
+    if(p.life>p.maxLife){fogParticles.splice(i,1);continue;}
+
+    p.x+=p.vx;
+    p.y+=p.vy*(0.5+Math.sin(p.wobble)*0.5);
+    p.wobble+=p.wobbleSpeed;
+    p.r+=0.08;
+
+    const lifeRatio=p.life/p.maxLife;
+    // fade in then fade out — peak around 20% life
+    let alpha;
+    if(lifeRatio<0.12){
+      alpha=lifeRatio/0.12;
+    } else if(lifeRatio<0.45){
+      alpha=1;
+    } else {
+      alpha=1-((lifeRatio-0.45)/0.55);
+    }
+    // max base opacity very low — barely visible
+    alpha*=0.045;
+
+    // density boost if this particle overlaps with opposite side
+    let densityBoost=0;
+    if(p.side==='right'&&leftParticles.length>0){
+      for(const lp of leftParticles){
+        const dx=p.x-lp.x,dy=p.y-lp.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<(p.r+lp.r)*0.6){densityBoost=0.018;break;}
+      }
+    } else if(p.side==='left'&&rightParticles.length>0){
+      for(const rp of rightParticles){
+        const dx=p.x-rp.x,dy=p.y-rp.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<(p.r+rp.r)*0.6){densityBoost=0.018;break;}
+      }
+    }
+
+    const finalAlpha=Math.min(0.09, alpha+densityBoost);
+    if(finalAlpha<0.001)continue;
+
+    const grd=wx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+    grd.addColorStop(0,`rgba(210,235,225,${finalAlpha})`);
+    grd.addColorStop(0.4,`rgba(195,225,215,${finalAlpha*0.6})`);
+    grd.addColorStop(1,'rgba(180,215,205,0)');
+    wx.fillStyle=grd;
+    wx.beginPath();wx.arc(p.x,p.y,p.r,0,Math.PI*2);wx.fill();
+  }
+}
 const SWELL_MS=2000,FULL_W=18,POOL_RAISE=50;
 let stonePat=null,bustImg=null,algaeImg=null;
 
@@ -159,6 +245,12 @@ function drawStagnantPool(t2){
 // ── ACTIVE STREAM + DISTURBANCE EFFECTS ──────────────────────────────
 function drawStream(t2){
   wx.clearRect(0,0,W,H);
+
+  function drawStream(t2){
+  wx.clearRect(0,0,W,H);
+  drawFog(t2);          // ← ADD THIS LINE
+  drawStagnantPool(t2);
+  // ... rest of function unchanged
 
   // Pool is ALWAYS drawn first
   drawStagnantPool(t2);
