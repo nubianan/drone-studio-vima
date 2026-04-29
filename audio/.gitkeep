@@ -1,1 +1,10 @@
-
+drone-studio/
+├── drone_algae.html   (or index.html)
+└── audio/
+    ├── a-minor.mp3
+    ├── b-minor.mp3
+    ├── c-minor.mp3
+    ├── d-minor.mp3
+    ├── e-minor.mp3
+    ├── f-minor.mp3
+    └── g-minor.mp3
