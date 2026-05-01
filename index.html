@@ -160,8 +160,8 @@ const wc=document.getElementById('wc'),wx=wc.getContext('2d');
 const oc=document.getElementById('oc'),ox=oc.getContext('2d');
 
 function loadImg(b64,type){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src='data:image/'+type+';base64,'+b64;});}
-function initA(){if(ac)return;ac=new(window.AudioContext||window.webkitAudioContext)();an=ac.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.86;an.connect(ac.destination);}
-async function loadAll(){initA();for(let i=0;i<AUDIO_PATHS.length;i++){if(bufs[i])continue;try{const r=await fetch(AUDIO_PATHS[i]);if(!r.ok)continue;bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}}}
+function initA(){if(ac)return;ac=new(window.AudioContext||window.webkitAudioContext)();an=ac.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.86;an.connect(ac.destination);loadAll();}
+async function loadAll(){for(let i=0;i<AUDIO_PATHS.length;i++){if(bufs[i])continue;try{const r=await fetch(AUDIO_PATHS[i]);if(!r.ok)continue;bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}}}
 
 async function play(idx){
   if(fad)return;initA();if(ac.state==='suspended')await ac.resume();
@@ -324,29 +324,43 @@ function setD(){
 
 function paintBg(){
   bx.clearRect(0,0,W,H);
-  // Stone texture full background
+  // Stone texture — drawn raw so it stays visible
   if(stonePat) bx.drawImage(stonePat,0,0,W,H);
-  else{bx.fillStyle='#1a2820';bx.fillRect(0,0,W,H);}
-  // Bronze-green tint
-  const tint=bx.createLinearGradient(0,0,W,H);
-  tint.addColorStop(0,'rgba(12,38,18,0.74)');tint.addColorStop(.4,'rgba(16,46,22,0.68)');
-  tint.addColorStop(.7,'rgba(10,32,14,0.72)');tint.addColorStop(1,'rgba(6,22,10,0.80)');
-  bx.fillStyle=tint;bx.fillRect(0,0,W,H);
-  const pat2=bx.createRadialGradient(W*.38,H*.35,0,W*.5,H*.5,W*.75);
-  pat2.addColorStop(0,'rgba(50,95,55,0.18)');pat2.addColorStop(.5,'rgba(32,68,36,0.08)');pat2.addColorStop(1,'rgba(0,0,0,0)');
-  bx.fillStyle=pat2;bx.fillRect(0,0,W,H);
-
-  // ── ALGAE BAND: from poolY-50 to poolY (0px to 50px zone) ────────────
+  else{bx.fillStyle='#2a3828';bx.fillRect(0,0,W,H);}
+  // Tint: dark muted green to match the original's verdigris palette.
+  // Multiply preserves stone texture while shifting hue toward bronze-green.
+  bx.globalCompositeOperation='multiply';
+  bx.fillStyle='rgba(72,110,68,0.82)';bx.fillRect(0,0,W,H);
+  bx.globalCompositeOperation='source-over';
   drawAlgaeBand();
-
-  // ── Carved pool basin ─────────────────────────────────────────────────
   drawPoolBasin();
-
   drawRelief();
+  drawCaveShape();
+}
 
-  const vg=bx.createRadialGradient(W*.5,H*.5,H*.12,W*.5,H*.5,W*.85);
-  vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(2,6,3,.68)');
-  bx.fillStyle=vg;bx.fillRect(0,0,W,H);
+// Cave wall vignette: pure black outer edge fading to transparent center.
+// Stone texture is fully visible in the middle; solid black at the edges
+// reads as the cave wall curving away into darkness.
+function drawCaveShape(){
+  const cx=W*.5, cy=H*.45;
+  // Main elliptical vignette
+  const vig=bx.createRadialGradient(cx,cy,W*.06,cx,cy,W*.80);
+  vig.addColorStop(0,'rgba(0,0,0,0)');
+  vig.addColorStop(.38,'rgba(0,0,0,0)');
+  vig.addColorStop(.60,'rgba(0,0,0,0.40)');
+  vig.addColorStop(.76,'rgba(0,0,0,0.72)');
+  vig.addColorStop(.88,'rgba(0,0,0,0.88)');
+  vig.addColorStop(1,'rgba(0,0,0,0.97)');
+  bx.fillStyle=vig;bx.fillRect(0,0,W,H);
+  // Corner fills — solid rock in each corner
+  const cR=W*.52;
+  [[0,0],[W,0],[0,H],[W,H]].forEach(([ex,ey])=>{
+    const cg=bx.createRadialGradient(ex,ey,0,ex,ey,cR);
+    cg.addColorStop(0,'rgba(0,0,0,0.90)');
+    cg.addColorStop(.48,'rgba(0,0,0,0.35)');
+    cg.addColorStop(1,'rgba(0,0,0,0)');
+    bx.fillStyle=cg;bx.fillRect(0,0,W,H);
+  });
 }
 
 function drawAlgaeBand(){
@@ -413,26 +427,38 @@ function drawBustMedallion(){
   bx.save();bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.clip();
   const iw=bustImg.naturalWidth,ih=bustImg.naturalHeight;
   const sc2=Math.min(diam/iw,diam/ih),dw=iw*sc2,dh=ih*sc2;
+  // Draw bust image
   bx.drawImage(bustImg,0,0,iw,ih,cx-dw/2,cy-dh/2,dw,dh);
-  bx.globalCompositeOperation='saturation';bx.fillStyle='rgba(128,128,128,0.30)';bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
+  // Match wall color scheme: same multiply tint as the wall (72,110,68)
+  // This harmonizes the warm brown bust with the dark forest-green wall
   bx.globalCompositeOperation='multiply';
-  const cg2=bx.createRadialGradient(cx-coinR*.15,cy-coinR*.25,coinR*.08,cx,cy,coinR);
-  cg2.addColorStop(0,'rgba(92,155,95,0.68)');cg2.addColorStop(.4,'rgba(62,115,66,0.74)');cg2.addColorStop(.75,'rgba(36,78,40,0.82)');cg2.addColorStop(1,'rgba(20,50,24,0.90)');
-  bx.fillStyle=cg2;bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
-  bx.globalCompositeOperation='screen';
-  const sg=bx.createRadialGradient(cx-coinR*.2,cy-coinR*.3,0,cx,cy,coinR*.9);
-  sg.addColorStop(0,'rgba(75,135,78,0.18)');sg.addColorStop(.6,'rgba(35,75,38,0.06)');sg.addColorStop(1,'rgba(0,0,0,0)');
-  bx.fillStyle=sg;bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
+  bx.fillStyle='rgba(72,110,68,0.82)';
+  bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
+  // Subtle radial: slightly lighter in center (lit), darker at rim (shadow)
+  const shade=bx.createRadialGradient(cx-coinR*.2,cy-coinR*.25,0,cx,cy,coinR);
+  shade.addColorStop(0,'rgba(255,255,255,0.12)');  // lighten center slightly
+  shade.addColorStop(.55,'rgba(255,255,255,0)');
+  shade.addColorStop(1,'rgba(0,0,0,0.22)');         // darken rim
+  bx.fillStyle=shade;bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
   bx.globalCompositeOperation='source-over';
-  const fg=bx.createRadialGradient(cx,cy,coinR*.72,cx,cy,coinR);
-  fg.addColorStop(0,'rgba(0,0,0,0)');fg.addColorStop(.4,'rgba(8,22,10,0.28)');fg.addColorStop(.75,'rgba(10,28,12,0.62)');fg.addColorStop(1,'rgba(12,32,14,0.90)');
+  // Edge vignette — fade to dark at the disc border
+  const fg=bx.createRadialGradient(cx,cy,coinR*.68,cx,cy,coinR);
+  fg.addColorStop(0,'rgba(0,0,0,0)');fg.addColorStop(.5,'rgba(0,0,0,0.18)');
+  fg.addColorStop(.85,'rgba(4,14,6,0.72)');fg.addColorStop(1,'rgba(2,10,4,0.95)');
   bx.fillStyle=fg;bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
   bx.restore();
+  // Rim rings — same dark green as wall
   bx.beginPath();bx.arc(cx,cy,coinR+1.5,0,Math.PI*2);bx.strokeStyle='rgba(2,10,4,.72)';bx.lineWidth=2.8;bx.stroke();
   bx.beginPath();bx.arc(cx,cy,coinR+4.5,0,Math.PI*2);bx.strokeStyle='rgba(2,10,4,.32)';bx.lineWidth=1.1;bx.stroke();
-  bx.beginPath();bx.arc(cx,cy,coinR-3,0,Math.PI*2);bx.strokeStyle='rgba(55,110,58,.22)';bx.lineWidth=.6;bx.stroke();
+  bx.beginPath();bx.arc(cx,cy,coinR-3,0,Math.PI*2);bx.strokeStyle='rgba(38,72,32,.30)';bx.lineWidth=.6;bx.stroke();
+  // Labels
   bx.font=`700 ${coinR*.28}px ${FONT}`;bx.textBaseline='middle';
-  [['S',cx-coinR*.68],['C',cx+coinR*.68]].forEach(([ch,lx])=>{bx.textAlign='center';bx.fillStyle='rgba(0,4,1,.65)';bx.fillText(ch,lx+.6,cy+coinR*.74+1.5);bx.fillStyle='rgba(62,120,65,.18)';bx.fillText(ch,lx-.3,cy+coinR*.74-.6);bx.fillStyle='rgba(22,55,26,.33)';bx.fillText(ch,lx,cy+coinR*.74);});
+  [['S',cx-coinR*.68],['C',cx+coinR*.68]].forEach(([ch,lx])=>{
+    bx.textAlign='center';
+    bx.fillStyle='rgba(0,4,1,.65)';bx.fillText(ch,lx+.6,cy+coinR*.74+1.5);
+    bx.fillStyle='rgba(48,95,42,.22)';bx.fillText(ch,lx-.3,cy+coinR*.74-.6);
+    bx.fillStyle='rgba(18,48,14,.38)';bx.fillText(ch,lx,cy+coinR*.74);
+  });
 }
 
 function drawRelief(){
@@ -475,10 +501,11 @@ async function handleStonePress(clientX, clientY) {
     await ac.resume();
   }
 
-  await loadAll();
+  if (!bufs[i]) {
+    try{const r=await fetch(AUDIO_PATHS[i]);if(r.ok)bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}
+  }
 
   if (!bufs[i]) {
-    console.error('Audio did not load:', AUDIO_PATHS[i]);
     document.getElementById('nlb').textContent = 'Audio file not found';
     document.getElementById('nnm').textContent = AUDIO_PATHS[i];
     document.getElementById('nnm').style.display = 'block';
@@ -500,10 +527,11 @@ async function playScaleByLetter(letter) {
     await ac.resume();
   }
 
-  await loadAll();
+  if (!bufs[i]) {
+    try{const r=await fetch(AUDIO_PATHS[i]);if(r.ok)bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}
+  }
 
   if (!bufs[i]) {
-    console.error('Audio did not load:', AUDIO_PATHS[i]);
     document.getElementById('nlb').textContent = 'Audio file not found';
     document.getElementById('nnm').textContent = AUDIO_PATHS[i];
     document.getElementById('nnm').style.display = 'block';
