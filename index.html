@@ -427,38 +427,26 @@ function drawBustMedallion(){
   bx.save();bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.clip();
   const iw=bustImg.naturalWidth,ih=bustImg.naturalHeight;
   const sc2=Math.min(diam/iw,diam/ih),dw=iw*sc2,dh=ih*sc2;
-  // Draw bust image
   bx.drawImage(bustImg,0,0,iw,ih,cx-dw/2,cy-dh/2,dw,dh);
-  // Match wall color scheme: same multiply tint as the wall (72,110,68)
-  // This harmonizes the warm brown bust with the dark forest-green wall
+  bx.globalCompositeOperation='saturation';bx.fillStyle='rgba(128,128,128,0.30)';bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
   bx.globalCompositeOperation='multiply';
-  bx.fillStyle='rgba(72,110,68,0.82)';
-  bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
-  // Subtle radial: slightly lighter in center (lit), darker at rim (shadow)
-  const shade=bx.createRadialGradient(cx-coinR*.2,cy-coinR*.25,0,cx,cy,coinR);
-  shade.addColorStop(0,'rgba(255,255,255,0.12)');  // lighten center slightly
-  shade.addColorStop(.55,'rgba(255,255,255,0)');
-  shade.addColorStop(1,'rgba(0,0,0,0.22)');         // darken rim
-  bx.fillStyle=shade;bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
+  const cg2=bx.createRadialGradient(cx-coinR*.15,cy-coinR*.25,coinR*.08,cx,cy,coinR);
+  cg2.addColorStop(0,'rgba(92,155,95,0.68)');cg2.addColorStop(.4,'rgba(62,115,66,0.74)');cg2.addColorStop(.75,'rgba(36,78,40,0.82)');cg2.addColorStop(1,'rgba(20,50,24,0.90)');
+  bx.fillStyle=cg2;bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
+  bx.globalCompositeOperation='screen';
+  const sg=bx.createRadialGradient(cx-coinR*.2,cy-coinR*.3,0,cx,cy,coinR*.9);
+  sg.addColorStop(0,'rgba(75,135,78,0.18)');sg.addColorStop(.6,'rgba(35,75,38,0.06)');sg.addColorStop(1,'rgba(0,0,0,0)');
+  bx.fillStyle=sg;bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
   bx.globalCompositeOperation='source-over';
-  // Edge vignette — fade to dark at the disc border
-  const fg=bx.createRadialGradient(cx,cy,coinR*.68,cx,cy,coinR);
-  fg.addColorStop(0,'rgba(0,0,0,0)');fg.addColorStop(.5,'rgba(0,0,0,0.18)');
-  fg.addColorStop(.85,'rgba(4,14,6,0.72)');fg.addColorStop(1,'rgba(2,10,4,0.95)');
+  const fg=bx.createRadialGradient(cx,cy,coinR*.72,cx,cy,coinR);
+  fg.addColorStop(0,'rgba(0,0,0,0)');fg.addColorStop(.4,'rgba(8,22,10,0.28)');fg.addColorStop(.75,'rgba(10,28,12,0.62)');fg.addColorStop(1,'rgba(12,32,14,0.90)');
   bx.fillStyle=fg;bx.beginPath();bx.arc(cx,cy,coinR,0,Math.PI*2);bx.fill();
   bx.restore();
-  // Rim rings — same dark green as wall
   bx.beginPath();bx.arc(cx,cy,coinR+1.5,0,Math.PI*2);bx.strokeStyle='rgba(2,10,4,.72)';bx.lineWidth=2.8;bx.stroke();
   bx.beginPath();bx.arc(cx,cy,coinR+4.5,0,Math.PI*2);bx.strokeStyle='rgba(2,10,4,.32)';bx.lineWidth=1.1;bx.stroke();
-  bx.beginPath();bx.arc(cx,cy,coinR-3,0,Math.PI*2);bx.strokeStyle='rgba(38,72,32,.30)';bx.lineWidth=.6;bx.stroke();
-  // Labels
+  bx.beginPath();bx.arc(cx,cy,coinR-3,0,Math.PI*2);bx.strokeStyle='rgba(55,110,58,.22)';bx.lineWidth=.6;bx.stroke();
   bx.font=`700 ${coinR*.28}px ${FONT}`;bx.textBaseline='middle';
-  [['S',cx-coinR*.68],['C',cx+coinR*.68]].forEach(([ch,lx])=>{
-    bx.textAlign='center';
-    bx.fillStyle='rgba(0,4,1,.65)';bx.fillText(ch,lx+.6,cy+coinR*.74+1.5);
-    bx.fillStyle='rgba(48,95,42,.22)';bx.fillText(ch,lx-.3,cy+coinR*.74-.6);
-    bx.fillStyle='rgba(18,48,14,.38)';bx.fillText(ch,lx,cy+coinR*.74);
-  });
+  [['S',cx-coinR*.68],['C',cx+coinR*.68]].forEach(([ch,lx])=>{bx.textAlign='center';bx.fillStyle='rgba(0,4,1,.65)';bx.fillText(ch,lx+.6,cy+coinR*.74+1.5);bx.fillStyle='rgba(62,120,65,.18)';bx.fillText(ch,lx-.3,cy+coinR*.74-.6);bx.fillStyle='rgba(22,55,26,.33)';bx.fillText(ch,lx,cy+coinR*.74);});
 }
 
 function drawRelief(){
