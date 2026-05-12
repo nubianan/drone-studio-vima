@@ -70,9 +70,7 @@ const WORKER_URL = "https://audio-signer.soniamariamedia.workers.dev";
 
 async function getSignedUrl(path) {
   const filename = path.split('/').pop();
-  const r = await fetch(`${WORKER_URL}?file=${encodeURIComponent(filename)}`);
-  const data = await r.json();
-  return data.url;
+  return `${WORKER_URL}?file=${encodeURIComponent(filename)}`;
 }
 
 // ── FOG SYSTEM ──────────────────────────────────────────────────────────
