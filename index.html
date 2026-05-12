@@ -66,6 +66,15 @@ const bufs={};
 let ac=null,an=null,cs=null,cg=null,ci=-1,sus=false,fad=false,ts=null,tid=null;
 let hi=-1,T=0,W=0,H=0,shimT=0,shimActive=true,streamOn=false,streamStart=null;
 
+const WORKER_URL = "https://audio-signer.soniamariamedia.workers.dev";
+
+async function getSignedUrl(path) {
+  const filename = path.split('/').pop();
+  const r = await fetch(`${WORKER_URL}?file=${encodeURIComponent(filename)}`);
+  const data = await r.json();
+  return data.url;
+}
+
 // ── FOG SYSTEM ──────────────────────────────────────────────────────────
 const fogParticles=[];
 let fogRightTimer=0,fogLeftTimer=0;
@@ -161,7 +170,7 @@ const oc=document.getElementById('oc'),ox=oc.getContext('2d');
 
 function loadImg(b64,type){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src='data:image/'+type+';base64,'+b64;});}
 function initA(){if(ac)return;ac=new(window.AudioContext||window.webkitAudioContext)();an=ac.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.86;an.connect(ac.destination);loadAll();}
-async function loadAll(){for(let i=0;i<AUDIO_PATHS.length;i++){if(bufs[i])continue;try{const r=await fetch(AUDIO_PATHS[i]);if(!r.ok)continue;bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}}}
+async function loadAll(){for(let i=0;i<AUDIO_PATHS.length;i++){if(bufs[i])continue;try{const url=await getSignedUrl(AUDIO_PATHS[i]);const r=await fetch(url);if(!r.ok)continue;bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}}}
 
 async function play(idx){
   if(fad)return;initA();if(ac.state==='suspended')await ac.resume();
@@ -490,7 +499,7 @@ async function handleStonePress(clientX, clientY) {
   }
 
   if (!bufs[i]) {
-    try{const r=await fetch(AUDIO_PATHS[i]);if(r.ok)bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}
+    try{const url=await getSignedUrl(AUDIO_PATHS[i]);const r=await fetch(url);if(r.ok)bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}
   }
 
   if (!bufs[i]) {
@@ -515,8 +524,8 @@ async function playScaleByLetter(letter) {
     await ac.resume();
   }
 
-  if (!bufs[i]) {
-    try{const r=await fetch(AUDIO_PATHS[i]);if(r.ok)bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}
+ if (!bufs[i]) {
+    try{const url=await getSignedUrl(AUDIO_PATHS[i]);const r=await fetch(url);if(r.ok)bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}
   }
 
   if (!bufs[i]) {
