@@ -65,6 +65,7 @@ const AUDIO_PATHS=['audio/a-minor.mp3','audio/b-minor.mp3','audio/c-minor.mp3','
 const bufs={};
 let ac=null,an=null,cs=null,cg=null,ci=-1,sus=false,fad=false,ts=null,tid=null;
 let hi=-1,T=0,W=0,H=0,shimT=0,shimActive=true,streamOn=false,streamStart=null;
+let uiLocked=true;
 
 const WORKER_URL = "https://audio-signer.soniamariamedia.workers.dev";
 
