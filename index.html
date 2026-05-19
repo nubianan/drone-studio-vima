@@ -566,7 +566,7 @@ let uiLocked=true;
 async function runIntro(){
   const overlay=document.createElement('div');
   overlay.id='intro';
-  overlay.style.cssText='position:fixed;inset:0;z-index:999;pointer-events:all;';
+  overlay.style.cssText='position:fixed;inset:0;z-index:999;pointer-events:all;background:rgba(8,14,10,0.82);';
   document.body.appendChild(overlay);
 
   const oc2=document.createElement('canvas');
@@ -582,22 +582,53 @@ async function runIntro(){
 
   function drawIntro(){
     const elapsed=Math.min(performance.now()-start,DURATION);
-    const progress=elapsed/DURATION; // 0 → 1
+    const progress=elapsed/DURATION;
     ctx2.clearRect(0,0,W,H);
 
     const pY=poolY();
     const poolW=W*.52;
     const poolDepth=16;
     const cx=W*.5;
+    const cy=H*.5;
 
-    // Water level rises from pool bottom up to pool surface
+    // ── Center text block ──
+    if(progress<0.88){
+      const textA=progress<0.08?progress/0.08:progress>0.75?(0.88-progress)/0.13:1;
+
+      // Large heading
+      const fontSize=Math.min(W*0.045,28);
+      ctx2.font=`300 ${fontSize}px 'Century Gothic','Avant Garde','Futura',sans-serif`;
+      ctx2.textAlign='center';ctx2.textBaseline='middle';
+      ctx2.letterSpacing='0.25em';
+      ctx2.fillStyle=`rgba(160,210,140,${textA*0.82})`;
+      ctx2.fillText('THE STONE POOL',cx,cy-fontSize*1.1);
+
+      // Subtext
+      const subSize=Math.min(W*0.022,12);
+      ctx2.font=`400 ${subSize}px 'Century Gothic','Avant Garde','Futura',sans-serif`;
+      ctx2.fillStyle=`rgba(120,175,100,${textA*0.5})`;
+      const dotStr='.'.repeat((Math.floor(elapsed/400)%4));
+      ctx2.fillText(`filling${dotStr}`,cx,cy+fontSize*0.6);
+
+      // Progress bar
+      const barW=Math.min(W*0.28,180);
+      const barH=1;
+      const bx=cx-barW/2;
+      const by=cy+fontSize*1.6;
+      // Track
+      ctx2.fillStyle=`rgba(60,100,60,${textA*0.3})`;
+      ctx2.fillRect(bx,by,barW,barH);
+      // Fill
+      ctx2.fillStyle=`rgba(130,200,110,${textA*0.65})`;
+      ctx2.fillRect(bx,by,barW*progress,barH);
+    }
+
+    // ── Pool filling animation (at bottom) ──
     const maxFill=poolDepth*1.2;
     const fillH=maxFill*progress;
-    const waterY=pY+poolDepth-fillH;
 
-    // Water body
     if(fillH>0.5){
-      const wg=ctx2.createLinearGradient(0,waterY,0,pY+poolDepth);
+      const wg=ctx2.createLinearGradient(0,pY-fillH,0,pY+poolDepth);
       wg.addColorStop(0,'rgba(40,120,80,0.55)');
       wg.addColorStop(1,'rgba(10,50,25,0.75)');
       ctx2.fillStyle=wg;
@@ -606,53 +637,38 @@ async function runIntro(){
       ctx2.fill();
     }
 
-    // Ripple on surface
+    // Ripples
     if(progress>0.05){
-      const numRipples=3;
-      for(let r=0;r<numRipples;r++){
-        const rph=((elapsed/1800)+r/numRipples)%1;
+      for(let r=0;r<3;r++){
+        const rph=((elapsed/1800)+r/3)%1;
         const rw=poolW*0.15+poolW*0.8*rph*progress;
         const ra=Math.sin(rph*Math.PI)*0.35*progress;
         ctx2.beginPath();
         ctx2.ellipse(cx,pY,rw,Math.max(0.5,rw*0.06),0,0,Math.PI*2);
         ctx2.strokeStyle=`rgba(140,220,170,${ra})`;
-        ctx2.lineWidth=1;
-        ctx2.stroke();
+        ctx2.lineWidth=1;ctx2.stroke();
       }
     }
 
-    // Water surface shimmer line
+    // Shimmer
     if(progress>0.1){
       const shimmerA=0.15+Math.sin(elapsed/200)*0.08;
       ctx2.beginPath();
       ctx2.ellipse(cx,pY,poolW*0.95*progress,poolDepth*0.35,0,0,Math.PI*2);
       ctx2.strokeStyle=`rgba(180,240,200,${shimmerA*progress})`;
-      ctx2.lineWidth=0.8;
-      ctx2.stroke();
+      ctx2.lineWidth=0.8;ctx2.stroke();
     }
 
-    // Loading text that fades out at the end
-    if(progress<0.85){
-      const textA=progress<0.1?progress/0.1:progress>0.75?(0.85-progress)/0.1:1;
-      const drops=Math.floor(progress*7);
-      const dotStr='.'.repeat((Math.floor(elapsed/400)%4));
-      ctx2.font=`500 11px 'Century Gothic','Avant Garde',sans-serif`;
-      ctx2.textAlign='center';ctx2.textBaseline='middle';
-      ctx2.fillStyle=`rgba(120,175,100,${textA*0.45})`;
-      ctx2.fillText(`attuning${dotStr}`,cx,pY-40);
-    }
-
-    // Fade out overlay at the end
+    // Fade out
     if(progress>0.88){
       const fadeA=(progress-0.88)/0.12;
-      ctx2.fillStyle=`rgba(14,26,20,${fadeA})`;
+      ctx2.fillStyle=`rgba(8,14,10,${fadeA})`;
       ctx2.fillRect(0,0,W,H);
     }
 
     if(elapsed<DURATION){
       requestAnimationFrame(drawIntro);
     } else {
-      // Done — unlock UI and remove overlay
       overlay.style.transition='opacity 0.6s';
       overlay.style.opacity='0';
       setTimeout(()=>{overlay.remove();uiLocked=false;},650);
