@@ -169,14 +169,15 @@ const oc=document.getElementById('oc'),ox=oc.getContext('2d');
 function loadImg(b64,type){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src='data:image/'+type+';base64,'+b64;});}
 function initA(){if(ac)return;ac=new(window.AudioContext||window.webkitAudioContext)();an=ac.createAnalyser();an.fftSize=2048;an.smoothingTimeConstant=.86;an.connect(ac.destination);loadAll();}
 async function loadAll(){
-  Promise.all(AUDIO_PATHS.map(async (path, i) => {
-    if(bufs[i]) return;
+  for(let i=0;i<AUDIO_PATHS.length;i++){
+    if(bufs[i])continue;
     try{
-      const url = await getSignedUrl(path);
-      const r = await fetch(url);
-      if(r.ok) bufs[i] = await ac.decodeAudioData(await r.arrayBuffer());
+      const url=await getSignedUrl(AUDIO_PATHS[i]);
+      const r=await fetch(url);
+      if(!r.ok)continue;
+      bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());
     }catch(e){}
-  }));
+  }
 }
 async function play(idx){
   if(fad)return;initA();if(ac.state==='suspended')await ac.resume();
@@ -491,6 +492,7 @@ const hlEl=document.getElementById('hl');
 hlEl.addEventListener('mousemove',e=>{const i=hitTest(e.clientX,e.clientY);hi=i;hlEl.style.cursor=i>=0?'pointer':'crosshair';document.getElementById('stlbl').textContent=i>=0?SCALES[i].label:'';});
 hlEl.addEventListener('mouseleave',()=>{hi=-1;document.getElementById('stlbl').textContent='';});
 async function handleStonePress(clientX, clientY) {
+  if(uiLocked) return;
   const i = hitTest(clientX, clientY);
 
   if (i < 0) {
@@ -505,32 +507,6 @@ async function handleStonePress(clientX, clientY) {
   }
 
   if (!bufs[i]) {
-    try{const url=await getSignedUrl(AUDIO_PATHS[i]);const r=await fetch(url);if(r.ok)bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}
-  }
-
-  if (!bufs[i]) {
-    document.getElementById('nlb').textContent = 'Audio file not found';
-    document.getElementById('nnm').textContent = AUDIO_PATHS[i];
-    document.getElementById('nnm').style.display = 'block';
-    return;
-  }
-
-  play(i);
-}
-
-async function playScaleByLetter(letter) {
-  const key = letter.toLowerCase();
-  const i = SCALES.findIndex(scale => scale.n.toLowerCase() === key);
-
-  if (i < 0) return;
-
-  initA();
-
-  if (ac.state === 'suspended') {
-    await ac.resume();
-  }
-
- if (!bufs[i]) {
     try{const url=await getSignedUrl(AUDIO_PATHS[i]);const r=await fetch(url);if(r.ok)bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}
   }
 
@@ -570,9 +546,116 @@ hlEl.addEventListener('touchstart', e => {
 }, { passive: false });
 window.addEventListener('resize',setD);
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
+let uiLocked=true;
+
+async function runIntro(){
+  const overlay=document.createElement('div');
+  overlay.id='intro';
+  overlay.style.cssText='position:fixed;inset:0;z-index:999;pointer-events:all;';
+  document.body.appendChild(overlay);
+
+  const oc2=document.createElement('canvas');
+  oc2.style.cssText='position:absolute;inset:0;width:100%;height:100%;';
+  overlay.appendChild(oc2);
+  const ctx2=oc2.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  oc2.width=W*dpr;oc2.height=H*dpr;
+  ctx2.setTransform(dpr,0,0,dpr,0,0);
+
+  const DURATION=12000;
+  const start=performance.now();
+
+  function drawIntro(){
+    const elapsed=Math.min(performance.now()-start,DURATION);
+    const progress=elapsed/DURATION; // 0 → 1
+    ctx2.clearRect(0,0,W,H);
+
+    const pY=poolY();
+    const poolW=W*.52;
+    const poolDepth=16;
+    const cx=W*.5;
+
+    // Water level rises from pool bottom up to pool surface
+    const maxFill=poolDepth*1.2;
+    const fillH=maxFill*progress;
+    const waterY=pY+poolDepth-fillH;
+
+    // Water body
+    if(fillH>0.5){
+      const wg=ctx2.createLinearGradient(0,waterY,0,pY+poolDepth);
+      wg.addColorStop(0,'rgba(40,120,80,0.55)');
+      wg.addColorStop(1,'rgba(10,50,25,0.75)');
+      ctx2.fillStyle=wg;
+      ctx2.beginPath();
+      ctx2.ellipse(cx,pY,poolW*progress,poolDepth,0,0,Math.PI*2);
+      ctx2.fill();
+    }
+
+    // Ripple on surface
+    if(progress>0.05){
+      const numRipples=3;
+      for(let r=0;r<numRipples;r++){
+        const rph=((elapsed/1800)+r/numRipples)%1;
+        const rw=poolW*0.15+poolW*0.8*rph*progress;
+        const ra=Math.sin(rph*Math.PI)*0.35*progress;
+        ctx2.beginPath();
+        ctx2.ellipse(cx,pY,rw,Math.max(0.5,rw*0.06),0,0,Math.PI*2);
+        ctx2.strokeStyle=`rgba(140,220,170,${ra})`;
+        ctx2.lineWidth=1;
+        ctx2.stroke();
+      }
+    }
+
+    // Water surface shimmer line
+    if(progress>0.1){
+      const shimmerA=0.15+Math.sin(elapsed/200)*0.08;
+      ctx2.beginPath();
+      ctx2.ellipse(cx,pY,poolW*0.95*progress,poolDepth*0.35,0,0,Math.PI*2);
+      ctx2.strokeStyle=`rgba(180,240,200,${shimmerA*progress})`;
+      ctx2.lineWidth=0.8;
+      ctx2.stroke();
+    }
+
+    // Loading text that fades out at the end
+    if(progress<0.85){
+      const textA=progress<0.1?progress/0.1:progress>0.75?(0.85-progress)/0.1:1;
+      const drops=Math.floor(progress*7);
+      const dotStr='.'.repeat((Math.floor(elapsed/400)%4));
+      ctx2.font=`500 11px 'Century Gothic','Avant Garde',sans-serif`;
+      ctx2.textAlign='center';ctx2.textBaseline='middle';
+      ctx2.fillStyle=`rgba(120,175,100,${textA*0.45})`;
+      ctx2.fillText(`attuning${dotStr}`,cx,pY-40);
+    }
+
+    // Fade out overlay at the end
+    if(progress>0.88){
+      const fadeA=(progress-0.88)/0.12;
+      ctx2.fillStyle=`rgba(14,26,20,${fadeA})`;
+      ctx2.fillRect(0,0,W,H);
+    }
+
+    if(elapsed<DURATION){
+      requestAnimationFrame(drawIntro);
+    } else {
+      // Done — unlock UI and remove overlay
+      overlay.style.transition='opacity 0.6s';
+      overlay.style.opacity='0';
+      setTimeout(()=>{overlay.remove();uiLocked=false;},650);
+    }
+  }
+
+  drawIntro();
+}
+
 (async()=>{
   [stonePat,bustImg,algaeImg]=await Promise.all([loadImg(TEX_B64,'jpeg'),loadImg(BUST_B64,'jpeg'),loadImg(ALGAE_B64,'jpeg')]);
   setD();loop();
+  // Pre-fetch all audio files (no AudioContext needed, just cache the raw bytes)
+AUDIO_PATHS.forEach(async path=>{
+  try{const url=await getSignedUrl(path);await fetch(url);}catch(e){}
+});
+  runIntro();
+})();
 })();
 </script>
 </body>
