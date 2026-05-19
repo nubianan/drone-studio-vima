@@ -520,6 +520,21 @@ async function handleStonePress(clientX, clientY) {
   play(i);
 }
 
+  
+async function playScaleByLetter(letter) {
+  if(uiLocked) return;
+  const key = letter.toLowerCase();
+  const i = SCALES.findIndex(scale => scale.n.toLowerCase() === key);
+  if (i < 0) return;
+  initA();
+  if (ac.state === 'suspended') await ac.resume();
+  if (!bufs[i]) {
+    try{const url=await getSignedUrl(AUDIO_PATHS[i]);const r=await fetch(url);if(r.ok)bufs[i]=await ac.decodeAudioData(await r.arrayBuffer());}catch(e){}
+  }
+  if (!bufs[i]) return;
+  play(i);
+}
+  
 window.addEventListener('keydown', e => {
   if (e.repeat) return;
   const typingTarget = e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]');
@@ -650,12 +665,10 @@ async function runIntro(){
 (async()=>{
   [stonePat,bustImg,algaeImg]=await Promise.all([loadImg(TEX_B64,'jpeg'),loadImg(BUST_B64,'jpeg'),loadImg(ALGAE_B64,'jpeg')]);
   setD();loop();
-  // Pre-fetch all audio files (no AudioContext needed, just cache the raw bytes)
-AUDIO_PATHS.forEach(async path=>{
-  try{const url=await getSignedUrl(path);await fetch(url);}catch(e){}
-});
+  AUDIO_PATHS.forEach(async path=>{
+    try{const url=await getSignedUrl(path);await fetch(url);}catch(e){}
+  });
   runIntro();
-})();
 })();
 </script>
 </body>
