@@ -560,6 +560,12 @@ hlEl.addEventListener('touchstart', e => {
   initA();
   if (ac && ac.state === 'suspended') ac.resume();
   const t = e.touches[0];
+  const i = hitTest(t.clientX, t.clientY);
+  if (i >= 0 && !bufs[i]) {
+    getSignedUrl(AUDIO_PATHS[i]).then(url => fetch(url)).then(r => {
+      if (r.ok) r.arrayBuffer().then(ab => ac.decodeAudioData(ab).then(buf => { bufs[i] = buf; }));
+    }).catch(() => {});
+  }
   handleStonePress(t.clientX, t.clientY);
 }, { passive: false });
 window.addEventListener('resize',setD);
