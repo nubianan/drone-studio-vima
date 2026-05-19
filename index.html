@@ -68,6 +68,11 @@ let hi=-1,T=0,W=0,H=0,shimT=0,shimActive=true,streamOn=false,streamStart=null;
 
 const WORKER_URL = "https://audio-signer.soniamariamedia.workers.dev";
 
+async function getSignedUrl(path) {
+  const filename = path.split('/').pop();
+  return `${WORKER_URL}?file=${encodeURIComponent(filename)}`;
+}
+
 // ── FOG SYSTEM ──────────────────────────────────────────────────────────
 const fogParticles=[];
 let fogRightTimer=0,fogLeftTimer=0;
