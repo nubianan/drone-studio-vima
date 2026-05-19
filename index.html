@@ -548,20 +548,23 @@ hlEl.addEventListener('click', e => {
 
 hlEl.addEventListener('touchstart', e => {
   e.preventDefault();
+  if(uiLocked) return;
   initA();
   if (ac && ac.state === 'suspended') ac.resume();
   const t = e.touches[0];
   const i = hitTest(t.clientX, t.clientY);
-  if (i >= 0 && !bufs[i]) {
+  if(i < 0){ stopA(); return; }
+  if(!bufs[i]){
     getSignedUrl(AUDIO_PATHS[i]).then(url => fetch(url)).then(r => {
-      if (r.ok) r.arrayBuffer().then(ab => ac.decodeAudioData(ab).then(buf => { bufs[i] = buf; }));
-    }).catch(() => {});
+      if(r.ok) return r.arrayBuffer();
+    }).then(ab => ac.decodeAudioData(ab)).then(buf => {
+      bufs[i]=buf;
+      play(i);
+    }).catch(()=>{});
+  } else {
+    play(i);
   }
-  handleStonePress(t.clientX, t.clientY);
 }, { passive: false });
-window.addEventListener('resize',setD);
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
-let uiLocked=true;
 
 async function runIntro(){
   const overlay=document.createElement('div');
