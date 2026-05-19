@@ -557,6 +557,8 @@ hlEl.addEventListener('click', e => {
 
 hlEl.addEventListener('touchstart', e => {
   e.preventDefault();
+  initA();
+  if (ac && ac.state === 'suspended') ac.resume();
   const t = e.touches[0];
   handleStonePress(t.clientX, t.clientY);
 }, { passive: false });
